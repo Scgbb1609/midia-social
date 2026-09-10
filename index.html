@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Senai+ | Plataforma Integrada de Projetos</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            senai: {
+              blue: '#005CA9',
+              darkBlue: '#004077',
+              lightBlue: '#E6F0F8',
+              accent: '#E30613'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .nav-btn {
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+      transition: all 150ms;
+      color: #475569;
+    }
+    .nav-btn:hover { background-color: #f1f5f9; }
+    .nav-btn.active { background-color: #005CA9; color: #ffffff; }
+
+    .filter-btn {
+      width: 100%;
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      transition: all 150ms;
+      color: #475569;
+    }
+    .filter-btn:hover { background-color: #f8fafc; }
+    .filter-btn.active { background-color: #E6F0F8; color: #005CA9; font-weight: 600; }
+
+    .code-tab-btn {
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 0.375rem;
+      color: #94a3b8;
+    }
+    .code-tab-btn.active {
+      background-color: #005CA9;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+  <!-- CONTAINER DE TOAST NOTIFICATIONS -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- TELA DE LOGIN INSTITUCIONAL -->
+  <div id="login-screen" class="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-slate-200 space-y-6">
+      <div class="text-center">
+        <div class="inline-block bg-senai-blue text-white font-extrabold text-3xl px-4 py-1 rounded mb-3">
+          Senai<span class="text-senai-accent">+</span>
+        </div>
+        <h1 class="text-xl font-bold text-slate-800">Plataforma Integrada</h1>
+        <p class="text-xs text-slate-500 mt-1">Selecione o perfil de teste para acessar:</p>
+      </div>
+
+      <div class="space-y-3">
+        <button onclick="fazerLogin('aluno')" class="w-full bg-slate-50 border border-slate-200 hover:border-senai-blue p-3 rounded-xl flex items-center gap-3 text-left transition group">
+          <div class="bg-senai-lightBlue p-2 rounded-lg text-senai-blue group-hover:bg-senai-blue group-hover:text-white transition">
+            <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-slate-800">Perfil: Aluno</p>
+            <p class="text-[11px] text-slate-500">Lucas Silva (Análise de Sistemas)</p>
+          </div>
+        </button>
+
+        <button onclick="fazerLogin('professor')" class="w-full bg-slate-50 border border-slate-200 hover:border-senai-blue p-3 rounded-xl flex items-center gap-3 text-left transition group">
+          <div class="bg-amber-100 p-2 rounded-lg text-amber-700 group-hover:bg-amber-600 group-hover:text-white transition">
+            <i data-lucide="award" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-slate-800">Perfil: Professor / Mentor</p>
+            <p class="text-[11px] text-slate-500">Prof. Carlos Eduardo (Coordenador)</p>
+          </div>
+        </button>
+
+        <button onclick="fazerLogin('empresa')" class="w-full bg-slate-50 border border-slate-200 hover:border-senai-blue p-3 rounded-xl flex items-center gap-3 text-left transition group">
+          <div class="bg-emerald-100 p-2 rounded-lg text-emerald-700 group-hover:bg-emerald-600 group-hover:text-white transition">
+            <i data-lucide="building-2" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-slate-800">Perfil: Recrutador / Empresa</p>
+            <p class="text-[11px] text-slate-500">TechIndustries Joinville</p>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA PRINCIPAL DA PLATAFORMA -->
+  <div id="app-screen" class="hidden min-h-screen">
+    
+    <!-- NAVBAR -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-3">
+          <div class="bg-senai-blue text-white font-extrabold text-xl px-3 py-1 rounded">
+            Senai<span class="text-senai-accent">+</span>
+          </div>
+          <span class="font-semibold text-lg text-slate-700 hidden sm:inline">
+            Portfólio & Ecossistema
+          </span>
+        </div>
+
+        <!-- BUSCA GERAL -->
+        <div class="flex-1 max-w-xs mx-2">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+            <input 
+              type="text" 
+              id="search-input" 
+              oninput="renderFeed()" 
+              placeholder="Buscar por projetos, tags..." 
+              class="w-full bg-slate-100 pl-9 pr-3 py-1.5 rounded-lg text-xs focus:outline-none focus:bg-white focus:ring-1 focus:ring-senai-blue transition"
+            />
+          </div>
+        </div>
+
+        <nav class="flex gap-1 sm:gap-2">
+          <button id="nav-feed" onclick="switchTab('feed')" class="nav-btn active">Projetos</button>
+          <button id="nav-amigos" onclick="switchTab('amigos')" class="nav-btn relative">
+            Amigos
+            <span id="badge-pedidos" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold"></span>
+          </button>
+          <button id="nav-codigos" onclick="switchTab('codigos')" class="nav-btn">Códigos</button>
+          <button id="nav-vagas" onclick="switchTab('vagas')" class="nav-btn">Vagas</button>
+          <button id="nav-gestao" onclick="switchTab('gestao')" class="nav-btn hidden text-amber-700 font-bold">Painel Gestão</button>
+        </nav>
+
+        <button id="btn-logout" onclick="fazerLogout()" class="text-slate-400 hover:text-rose-600 p-2 rounded-lg transition" title="Sair">
+          <i data-lucide="log-out" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+      
+      <!-- SIDEBAR PERFIL -->
+      <aside class="lg:col-span-1 space-y-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <img id="user-avatar" src="" alt="Avatar" class="w-16 h-16 rounded-full mx-auto mb-2 border-2 border-senai-blue object-cover" />
+          <h2 id="user-name" class="font-bold text-slate-800"></h2>
+          <p id="user-course" class="text-xs text-slate-500"></p>
+          <span id="user-status" class="inline-block mt-2 text-xs bg-senai-lightBlue text-senai-blue px-2 py-0.5 rounded-full font-semibold"></span>
+
+          <div class="mt-4 pt-4 border-t border-slate-100 text-left text-xs space-y-2">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Turma/Role:</span>
+              <span id="user-class" class="font-semibold text-slate-700"></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Área:</span>
+              <span id="user-area" class="font-semibold text-slate-700"></span>
+            </div>
+          </div>
+
+          <!-- BOTÃO PUBLICAR NOVO PROJETO -->
+          <div class="mt-4 pt-4 border-t border-slate-100">
+            <button onclick="openNewProjectModal()" class="w-full bg-senai-blue hover:bg-senai-darkBlue text-white font-semibold py-2 rounded-lg text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Publicar Projeto
+            </button>
+          </div>
+        </div>
+
+        <!-- FILTROS DO FEED -->
+        <div id="filter-box" class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Exibir</h3>
+          <button id="filter-todos" onclick="setFilter('todos')" class="filter-btn active">Todos os Projetos</button>
+          <button id="filter-turma" onclick="setFilter('turma')" class="filter-btn">Minha Turma</button>
+        </div>
+      </aside>
+
+      <!-- CONTEÚDO DAS ABAS -->
+      <section class="lg:col-span-3 space-y-6">
+        
+        <!-- ABA: FEED DE PROJETOS -->
+        <div id="tab-feed" class="space-y-6">
+          <div id="destaque-box" class="bg-gradient-to-r from-senai-blue to-blue-700 rounded-xl p-5 text-white shadow-md">
+            <div class="flex items-center gap-2 mb-2 text-amber-300 font-semibold text-xs uppercase tracking-wider">
+              <i data-lucide="award" class="w-4 h-4"></i> Projeto em Destaque da Semana
+            </div>
+            <div id="destaque-container"></div>
+          </div>
+
+          <!-- LISTA DINÂMICA DE POSTAGENS -->
+          <div id="projects-list" class="space-y-4"></div>
+        </div>
+
+        <!-- ABA: AMIGOS E CHAT -->
+        <div id="tab-amigos" class="hidden space-y-6">
+          <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="user-plus" class="w-5 h-5 text-senai-blue"></i> Enviar Solicitação de Amizade
+            </h2>
+            <div class="flex gap-2">
+              <input type="text" id="input-add-amigo" placeholder="Digite a matrícula ou nome do colega..." class="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+              <button onclick="enviarSolicitacao()" class="bg-senai-blue text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-senai-darkBlue transition flex items-center gap-1">
+                <i data-lucide="send" class="w-4 h-4"></i> Enviar Pedido
+              </button>
+            </div>
+          </div>
+
+          <!-- Solicitações Pendentes -->
+          <div id="section-pedidos" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+            <h3 class="text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="clock" class="w-4 h-4"></i> Pedidos de Amizade Recebidos
+            </h3>
+            <div id="pedidos-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+          </div>
+
+          <!-- Lista de Amigos Adicionados -->
+          <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Meus Amigos (<span id="count-amigos">0</span>)</h3>
+            <div id="amigos-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+          </div>
+        </div>
+
+        <!-- ABA: CÓDIGOS LIVRES -->
+        <div id="tab-codigos" class="hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="code" class="w-5 h-5 text-senai-blue"></i> Repositório de Códigos Livres
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">Snippets prontos e utilitários criados pelos alunos para acelerar seus projetos.</p>
+          </div>
+          <div id="codigos-list" class="space-y-4"></div>
+        </div>
+
+        <!-- ABA: VAGAS DE EMPREGO -->
+        <div id="tab-vagas" class="hidden space-y-6">
+          <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="briefcase" class="w-5 h-5 text-senai-blue"></i> Oportunidades & Estágios Industriais
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">Vagas exclusivas de empresas parceiras do SENAI para alunos e formandos.</p>
+          </div>
+          <div id="vagas-list" class="space-y-4"></div>
+        </div>
+
+        <!-- ABA: PAINEL DE GESTÃO (PROFESSOR / EMPRESA) -->
+        <div id="tab-gestao" class="hidden space-y-6">
+          <div id="gestao-professor" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4 hidden">
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="shield-check" class="w-5 h-5 text-amber-600"></i> Painel do Professor - Curadoria de Projetos
+            </h2>
+            <p class="text-xs text-slate-500">Conceda selos institucionais de aprovação ou destaque semanal aos projetos dos alunos.</p>
+            <div id="professor-projects-list" class="space-y-3 pt-2"></div>
+          </div>
+
+          <div id="gestao-empresa" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4 hidden">
+            <div class="flex justify-between items-center">
+              <div>
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <i data-lucide="building" class="w-5 h-5 text-emerald-600"></i> Gestão de Vagas & Candidaturas
+                </h2>
+                <p class="text-xs text-slate-500">Cadastre novas oportunidades e revise currículos de alunos interessados.</p>
+              </div>
+              <button onclick="openNovaVagaModal()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-emerald-700 transition flex items-center gap-1">
+                <i data-lucide="plus" class="w-4 h-4"></i> Criar Nova Vaga
+              </button>
+            </div>
+
+            <div class="pt-4 space-y-3">
+              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Candidaturas Recebidas</h3>
+              <div id="candidaturas-list" class="space-y-2"></div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: NOVO PROJETO -->
+  <div id="modal-novo-projeto" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h2 class="text-lg font-bold text-slate-800">Publicar Novo Projeto no Senai+</h2>
+        <button onclick="closeNewProjectModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+      </div>
+
+      <form id="form-novo-projeto" onsubmit="salvarNovoProjeto(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Título do Projeto</label>
+          <input type="text" id="proj-titulo" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Descrição</label>
+          <textarea id="proj-desc" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tecnologias (vírgulas)</label>
+            <input type="text" id="proj-techs" placeholder="Ex: React, Node, C++" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Status</label>
+            <select id="proj-status" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue">
+              <option value="Em Desenvolvimento">Em Desenvolvimento</option>
+              <option value="Concluído">Concluído</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Link da Imagem de Capa (Opcional)</label>
+          <input type="url" id="proj-img" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Código-Fonte Principal (Opcional)</label>
+          <textarea id="proj-code" rows="4" placeholder="// Cole seu código aqui" class="w-full bg-slate-900 text-emerald-400 font-mono rounded-lg p-3 text-xs focus:outline-none"></textarea>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeNewProjectModal()" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg text-xs font-semibold">Cancelar</button>
+          <button type="submit" class="bg-senai-blue text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-senai-darkBlue">Publicar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL VISUALIZAÇÃO DO PROJETO -->
+  <div id="modal-project" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto space-y-4">
+      <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+        <div>
+          <span id="modal-status" class="text-xs px-2 py-0.5 rounded-full font-semibold"></span>
+          <h2 id="modal-title" class="text-xl font-bold text-slate-800 mt-1"></h2>
+          <p id="modal-author" class="text-xs text-slate-500"></p>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-sm text-slate-600">
+        <div id="modal-img-container" class="hidden">
+          <img id="modal-img" class="w-full h-48 object-cover rounded-xl border border-slate-200" />
+        </div>
+
+        <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Descrição Detalhada</h3>
+        <p id="modal-description" class="leading-relaxed"></p>
+
+        <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider pt-2">Tecnologias & Materiais</h3>
+        <div id="modal-techs" class="flex flex-wrap gap-2"></div>
+
+        <div id="modal-code-section" class="pt-4 border-t border-slate-100 space-y-2">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1">
+              <i data-lucide="terminal" class="w-4 h-4 text-senai-blue"></i> Código-Fonte Funcional
+            </h3>
+            <div id="code-tabs" class="flex gap-1"></div>
+          </div>
+          <div class="relative">
+            <pre class="p-4 bg-slate-900 text-emerald-400 rounded-xl font-mono text-xs overflow-x-auto max-h-60"><code id="modal-code-block"></code></pre>
+            <button onclick="copiarCodigoModal()" class="absolute top-2 right-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded text-[10px] font-semibold border border-slate-700 flex items-center gap-1">
+              <i data-lucide="copy" class="w-3 h-3"></i> Copiar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2 text-right border-t border-slate-100">
+        <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-2 rounded-lg text-xs transition">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CHAT DE MENSAGENS -->
+  <div id="modal-chat" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4 flex flex-col h-[500px]">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <img id="chat-avatar" class="w-8 h-8 rounded-full object-cover" />
+          <div>
+            <h3 id="chat-name" class="font-bold text-sm text-slate-800"></h3>
+            <p class="text-[10px] text-emerald-600 font-semibold">Online</p>
+          </div>
+        </div>
+        <button onclick="closeChatModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div id="chat-messages" class="flex-1 overflow-y-auto space-y-2 p-2 bg-slate-50 rounded-lg border border-slate-100"></div>
+
+      <form onsubmit="enviarMensagemChat(event)" class="flex gap-2 pt-2 border-t border-slate-100">
+        <input type="text" id="chat-input" placeholder="Digite uma mensagem..." required class="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+        <button type="submit" class="bg-senai-blue text-white px-3 py-2 rounded-lg text-xs font-semibold hover:bg-senai-darkBlue">
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL FORMULÁRIO DE CANDIDATURA À VAGA -->
+  <div id="modal-vaga" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+        <div>
+          <h2 id="vaga-modal-titulo" class="text-lg font-bold text-slate-800">Candidatar-se à Vaga</h2>
+          <p id="vaga-modal-empresa" class="text-xs text-slate-500"></p>
+        </div>
+        <button onclick="closeVagaModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+
+      <form id="form-candidatura" onsubmit="enviarCandidatura(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nome Completo</label>
+          <input type="text" id="cand-nome" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">E-mail</label>
+            <input type="email" id="cand-email" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Telefone</label>
+            <input type="text" id="cand-fone" required placeholder="(47) 99999-9999" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Link do Portfólio / GitHub</label>
+          <input type="url" id="cand-link" placeholder="https://github.com/seu-usuario" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Mensagem para a Empresa</label>
+          <textarea id="cand-msg" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue"></textarea>
+        </div>
+        <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeVagaModal()" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg text-xs font-semibold">Cancelar</button>
+          <button type="submit" class="bg-senai-blue text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-senai-darkBlue">Enviar Candidatura</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL CRIAR VAGA (EMPRESA) -->
+  <div id="modal-nova-vaga" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h2 class="text-lg font-bold text-slate-800">Cadastrar Nova Vaga</h2>
+        <button onclick="closeNovaVagaModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+      </div>
+
+      <form onsubmit="salvarNovaVaga(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Título do Cargo</label>
+          <input type="text" id="vaga-titulo" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Localização</label>
+            <input type="text" id="vaga-local" required placeholder="Joinville, SC (Híbrido)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Área</label>
+            <input type="text" id="vaga-area" required placeholder="Tecnologia da Informação" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Requisitos</label>
+          <input type="text" id="vaga-req" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Bolsa / Salário</label>
+          <input type="text" id="vaga-bolsa" required placeholder="R$ 1.800,00 + Benefícios" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-senai-blue" />
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeNovaVagaModal()" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-lg text-xs font-semibold">Cancelar</button>
+          <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-emerald-700">Publicar Vaga</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCRIPT JAVASCRIPT COMPLETO E PERSISTENTE -->
+  <script>
+    function renderIcons() {
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      const bgColor = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-rose-600' : 'bg-senai-blue';
+      toast.className = `${bgColor} text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto`;
+      
+      toast.innerHTML = `<i data-lucide="${type === 'success' ? 'check-circle' : 'info'}" class="w-4 h-4"></i> ${msg}`;
+      container.appendChild(toast);
+      renderIcons();
+
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    const MOCK_USUARIOS = {
+      aluno: {
+        id: "usr_aluno",
+        nome: "Lucas Silva",
+        role: "aluno",
+        matricula: "2024.2.0084",
+        curso: "Desenvolvimento de Sistemas",
+        turma: "Análise de Sistemas 2024.2",
+        area: "Tecnologia da Informação",
+        status: "Cursando",
+        foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150"
+      },
+      professor: {
+        id: "usr_prof",
+        nome: "Prof. Carlos Eduardo",
+        role: "professor",
+        matricula: "DOCENT-084",
+        curso: "Docente / Coordenador",
+        turma: "Coordenadoria TI",
+        area: "Tecnologia da Informação",
+        status: "Docente",
+        foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150"
+      },
+      empresa: {
+        id: "usr_empresa",
+        nome: "TechIndustries Joinville",
+        role: "empresa",
+        matricula: "CNPJ-84.0001",
+        curso: "Empresa Parceira",
+        turma: "Recrutamento",
+        area: "Tecnologia / Indústria",
+        status: "Parceiro Oficial",
+        foto: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=150"
+      }
+    };
+
+    const MOCK_PESSOAS = [
+      { id: "p1", nome: "Mariana Costa", curso: "Engenharia de Software", turma: "Sistemas 2024.1", area: "Sustentabilidade", foto: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" },
+      { id: "p2", nome: "Rafael Mendes", curso: "Desenvolvimento Web", turma: "Web 2024.2", area: "SaaS B2B", foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150" },
+      { id: "p3", nome: "Beatriz Lima", curso: "Design & Computação 3D", turma: "Análise de Sistemas 2024.2", area: "Design 3D", foto: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" },
+      { id: "p4", nome: "Mateus Oliveira", curso: "Sistemas Distribuídos", turma: "Análise de Sistemas 2024.2", area: "Redes & Geolocalização", foto: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150" }
+    ];
+
+    let currentUser = null;
+    let currentFilter = 'todos';
+    let activeChatUser = null;
+    let selectedVagaId = null;
+
+    // PROJETOS INTEGRADOS (DIVERSIFICADOS)
+    let dbProjects = JSON.parse(localStorage.getItem('senai_projects')) || [
+      {
+        id: 1,
+        autorId: "p1",
+        titulo: "EcoTrack — Plataforma de Pegada de Carbono",
+        autor: "Mariana Costa",
+        turma: "Sistemas 2024.1",
+        area: "Tecnologia & Sustentabilidade",
+        statusProjeto: "Concluído",
+        curtidas: 68,
+        curtidoPor: [],
+        aprovadoProfessor: true,
+        eDestaqueSemana: true,
+        descricao: "Plataforma B2C focada em monitoramento e compensação da pegada de carbono pessoal. Conta com integração via Open Finance para cálculo automático de emissões com base nas compras e gamificação para incentivo de metas verdes.",
+        tecnologias: ["React Native", "Node.js", "PostgreSQL", "Open Finance API"],
+        codigos: { "Node.js": "async function calcCarbon(transaction) {\n  const factor = getCategoryFactor(transaction.category);\n  return transaction.amount * factor;\n}" },
+        feedbacks: []
+      },
+      {
+        id: 2,
+        autorId: "p2",
+        titulo: "PulseDesk — SaaS de Gestão de Atendimento",
+        autor: "Rafael Mendes",
+        turma: "Web 2024.2",
+        area: "SaaS B2B",
+        statusProjeto: "Em Desenvolvimento",
+        curtidas: 42,
+        curtidoPor: [],
+        aprovadoProfessor: true,
+        eDestaqueSemana: false,
+        descricao: "Painel web projetado para centralizar atendimentos de múltiplos canais (WhatsApp, Email, Instagram) em uma fila única com baixa latência e análise de sentimento por IA para priorização automática de chamados.",
+        tecnologias: ["Vue.js", "Go (Golang)", "Redis", "WebSockets"],
+        codigos: { "Go": "func handleWebSocket(w http.ResponseWriter, r *http.Request) {\n  conn, _ := upgrader.Upgrade(w, r, nil)\n  defer conn.Close()\n  // Sincronização em tempo real\n}" },
+        feedbacks: []
+      },
+      {
+        id: 3,
+        autorId: "p3",
+        titulo: "ArtFlow — Marketplace de Arte Digital & 3D",
+        autor: "Beatriz Lima",
+        turma: "Análise de Sistemas 2024.2",
+        area: "Design & Computação Gráfica",
+        statusProjeto: "Concluído",
+        curtidas: 55,
+        curtidoPor: [],
+        aprovadoProfessor: false,
+        eDestaqueSemana: false,
+        descricao: "Marketplace voltado para artistas independentes venderem modelos 3D e texturas. Inclui um renderizador 3D leve integrado ao navegador para inspeção interativa em 360° antes da compra.",
+        tecnologias: ["Next.js", "Three.js", "TypeScript", "Supabase"],
+        codigos: { "Three.js": "const scene = new THREE.Scene();\nconst camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);\nconst renderer = new THREE.WebGLRenderer({ antialias: true });" },
+        feedbacks: []
+      },
+      {
+        id: 4,
+        autorId: "p4",
+        titulo: "BairroAtivo — Rede Social Comunitária Local",
+        autor: "Mateus Oliveira",
+        turma: "Análise de Sistemas 2024.2",
+        area: "Redes & Geolocalização",
+        statusProjeto: "Em Desenvolvimento",
+        curtidas: 31,
+        curtidoPor: [],
+        aprovadoProfessor: false,
+        eDestaqueSemana: false,
+        descricao: "Aplicação voltada para pequenas comunidades e bairros. Conecta moradores a pequenos comerciantes com feed geolocalizado limitado por raio de distância (ex: até 2 km), preservando a privacidade dos dados sensíveis.",
+        tecnologias: ["Flutter", "Python (FastAPI)", "MongoDB", "Google Maps API"],
+        codigos: { "Python": "@app.get('/feed/nearby')\ndef get_nearby(lat: float, lng: float, radius_km: float = 2.0):\n    return db.posts.find({'location': {'$nearSphere': [lng, lat], '$maxDistance': radius_km / 6378.1}})" },
+        feedbacks: []
+      }
+    ];
+
+    let dbVagas = JSON.parse(localStorage.getItem('senai_vagas')) || [
+      {
+        id: 1,
+        titulo: "Estágio em Desenvolvimento Web Fullstack",
+        empresa: "TechIndustries Joinville",
+        local: "Joinville, SC (Híbrido)",
+        requisitos: "Conhecimento em JavaScript/TypeScript, React ou Vue e bancos SQL.",
+        bolsa: "R$ 1.800,00 + VT + VR",
+        area: "Tecnologia da Informação"
+      }
+    ];
+
+    let dbCandidaturas = JSON.parse(localStorage.getItem('senai_candidaturas')) || [];
+    let dbMensagens = JSON.parse(localStorage.getItem('senai_mensagens')) || {};
+    let meusAmigosIds = JSON.parse(localStorage.getItem('senai_amigos')) || ["p1", "p3"];
+    let pedidosRecebidosIds = JSON.parse(localStorage.getItem('senai_pedidos')) || ["p4"];
+
+    function saveData() {
+      localStorage.setItem('senai_projects', JSON.stringify(dbProjects));
+      localStorage.setItem('senai_vagas', JSON.stringify(dbVagas));
+      localStorage.setItem('senai_candidaturas', JSON.stringify(dbCandidaturas));
+      localStorage.setItem('senai_mensagens', JSON.stringify(dbMensagens));
+      localStorage.setItem('senai_amigos', JSON.stringify(meusAmigosIds));
+      localStorage.setItem('senai_pedidos', JSON.stringify(pedidosRecebidosIds));
+    }
+
+    // LOGIN & AUTENTICAÇÃO
+    function fazerLogin(tipo) {
+      currentUser = MOCK_USUARIOS[tipo];
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('app-screen').classList.remove('hidden');
+
+      document.getElementById('user-avatar').src = currentUser.foto;
+      document.getElementById('user-name').innerText = currentUser.nome;
+      document.getElementById('user-course').innerText = currentUser.curso;
+      document.getElementById('user-status').innerText = currentUser.status;
+      document.getElementById('user-class').innerText = currentUser.turma;
+      document.getElementById('user-area').innerText = currentUser.area;
+
+      const navGestao = document.getElementById('nav-gestao');
+      if (currentUser.role === 'professor' || currentUser.role === 'empresa') {
+        navGestao.classList.remove('hidden');
+      } else {
+        navGestao.classList.add('hidden');
+      }
+
+      updateBadges();
+      switchTab('feed');
+      showToast(`Bem-vindo, ${currentUser.nome}!`, 'success');
+    }
+
+    function fazerLogout() {
+      currentUser = null;
+      document.getElementById('app-screen').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+    }
+
+    // NAVEGAÇÃO DE ABAS
+    function switchTab(tab) {
+      const tabs = ['feed', 'amigos', 'codigos', 'vagas', 'gestao'];
+      tabs.forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`nav-${t}`);
+        if (el) el.classList.add('hidden');
+        if (btn) btn.classList.remove('active');
+      });
+
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+      document.getElementById(`nav-${tab}`).classList.add('active');
+
+      if (tab === 'feed') renderFeed();
+      if (tab === 'amigos') renderAmigosTab();
+      if (tab === 'codigos') renderCodigosTab();
+      if (tab === 'vagas') renderVagasTab();
+      if (tab === 'gestao') renderGestaoTab();
+      renderIcons();
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.getElementById('filter-todos').classList.toggle('active', filter === 'todos');
+      document.getElementById('filter-turma').classList.toggle('active', filter === 'turma');
+      renderFeed();
+    }
+
+    // RENDERIZAÇÃO DO FEED
+    function renderFeed() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const list = document.getElementById('projects-list');
+      const destaqueContainer = document.getElementById('destaque-container');
+
+      // Projeto Destaque
+      const destaque = dbProjects.find(p => p.eDestaqueSemana) || dbProjects[0];
+      if (destaque) {
+        destaqueContainer.innerHTML = `
+          <h3 class="text-xl font-bold">${destaque.titulo}</h3>
+          <p class="text-xs opacity-90 mt-1 mb-3">${destaque.descricao}</p>
+          <div class="flex items-center justify-between">
+            <span class="text-xs bg-white/20 px-2 py-1 rounded font-medium">Por: ${destaque.autor} (${destaque.turma})</span>
+            <button onclick="verDetalhesProjeto(${destaque.id})" class="bg-white text-senai-blue px-3 py-1 rounded-lg text-xs font-bold hover:bg-slate-100 transition">Visualizar Projeto</button>
+          </div>
+        `;
+      }
+
+      // Filtragem de Projetos
+      let filtrados = dbProjects.filter(p => {
+        const matchSearch = p.titulo.toLowerCase().includes(search) || 
+                            p.descricao.toLowerCase().includes(search) ||
+                            p.tecnologias.some(t => t.toLowerCase().includes(search));
+        const matchTurma = currentFilter === 'turma' ? p.turma === currentUser.turma : true;
+        return matchSearch && matchTurma;
+      });
+
+      if (filtrados.length === 0) {
+        list.innerHTML = `<p class="text-center text-xs text-slate-400 py-8">Nenhum projeto encontrado com os filtros atuais.</p>`;
+        return;
+      }
+
+      list.innerHTML = filtrados.map(p => {
+        const jaCurtio = p.curtidoPor.includes(currentUser.id);
+        return `
+          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3 transition hover:border-senai-blue">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-slate-800 text-base">${p.titulo}</h3>
+                  ${p.aprovadoProfessor ? `<span class="bg-amber-100 text-amber-700 text-[10px] px-2 py-0.5 rounded-full font-bold border border-amber-200">Aprovado pelo Professor</span>` : ''}
+                </div>
+                <p class="text-xs text-slate-500">Por ${p.autor} • <span class="text-slate-400">${p.turma}</span></p>
+              </div>
+              <span class="text-xs px-2.5 py-1 rounded-full font-semibold ${p.statusProjeto === 'Concluído' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}">${p.statusProjeto}</span>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed">${p.descricao}</p>
+
+            <div class="flex flex-wrap gap-1.5">
+              ${p.tecnologias.map(t => `<span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-0.5 rounded">${t}</span>`).join('')}
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+              <button onclick="curtirProjeto(${p.id})" class="flex items-center gap-1.5 ${jaCurtio ? 'text-rose-600 font-bold' : 'text-slate-500 hover:text-rose-600'} transition">
+                <i data-lucide="heart" class="w-4 h-4 ${jaCurtio ? 'fill-rose-600' : ''}"></i> ${p.curtidas} Curtidas
+              </button>
+              <button onclick="verDetalhesProjeto(${p.id})" class="text-senai-blue font-semibold hover:underline flex items-center gap-1">Ver Código / Detalhes <i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      renderIcons();
+    }
+
+    function curtirProjeto(id) {
+      const proj = dbProjects.find(p => p.id === id);
+      if (!proj) return;
+      const idx = proj.curtidoPor.indexOf(currentUser.id);
+      if (idx > -1) {
+        proj.curtidoPor.splice(idx, 1);
+        proj.curtidas--;
+      } else {
+        proj.curtidoPor.push(currentUser.id);
+        proj.curtidas++;
+      }
+      saveData();
+      renderFeed();
+    }
+
+    // MODAL DE PROJETO
+    function verDetalhesProjeto(id) {
+      const p = dbProjects.find(item => item.id === id);
+      if (!p) return;
+
+      document.getElementById('modal-title').innerText = p.titulo;
+      document.getElementById('modal-author').innerText = `Autor: ${p.autor} (${p.turma})`;
+      document.getElementById('modal-description').innerText = p.descricao;
+      
+      const modalStatus = document.getElementById('modal-status');
+      modalStatus.innerText = p.statusProjeto;
+      modalStatus.className = `text-xs px-2 py-0.5 rounded-full font-semibold ${p.statusProjeto === 'Concluído' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`;
+
+      document.getElementById('modal-techs').innerHTML = p.tecnologias.map(t => `<span class="bg-senai-lightBlue text-senai-blue text-xs font-semibold px-2.5 py-1 rounded-md">${t}</span>`).join('');
+
+      const keys = Object.keys(p.codigos || {});
+      const codeSec = document.getElementById('modal-code-section');
+      if (keys.length > 0) {
+        codeSec.classList.remove('hidden');
+        document.getElementById('modal-code-block').innerText = p.codigos[keys[0]];
+      } else {
+        codeSec.classList.add('hidden');
+      }
+
+      document.getElementById('modal-project').classList.remove('hidden');
+      renderIcons();
+    }
+
+    function closeModal() {
+      document.getElementById('modal-project').classList.add('hidden');
+    }
+
+    function copiarCodigoModal() {
+      const code = document.getElementById('modal-code-block').innerText;
+      navigator.clipboard.writeText(code);
+      showToast("Código copiado para a área de transferência!", "success");
+    }
+
+    // NOVO PROJETO MODAL
+    function openNewProjectModal() { document.getElementById('modal-novo-projeto').classList.remove('hidden'); }
+    function closeNewProjectModal() { document.getElementById('modal-novo-projeto').classList.add('hidden'); }
+
+    function salvarNovoProjeto(e) {
+      e.preventDefault();
+      const titulo = document.getElementById('proj-titulo').value;
+      const desc = document.getElementById('proj-desc').value;
+      const techs = document.getElementById('proj-techs').value.split(',').map(t => t.trim());
+      const status = document.getElementById('proj-status').value;
+      const code = document.getElementById('proj-code').value;
+
+      const novo = {
+        id: Date.now(),
+        autorId: currentUser.id,
+        titulo: titulo,
+        autor: currentUser.nome,
+        turma: currentUser.turma,
+        area: currentUser.area,
+        statusProjeto: status,
+        curtidas: 0,
+        curtidoPor: [],
+        aprovadoProfessor: false,
+        eDestaqueSemana: false,
+        descricao: desc,
+        tecnologias: techs,
+        codigos: code ? { "Principal": code } : {},
+        feedbacks: []
+      };
+
+      dbProjects.unshift(novo);
+      saveData();
+      closeNewProjectModal();
+      renderFeed();
+      showToast("Projeto publicado com sucesso no Senai+!", "success");
+      e.target.reset();
+    }
+
+    // AMIGOS & CHAT
+    function renderAmigosTab() {
+      const amigosList = document.getElementById('amigos-list');
+      const pedidosList = document.getElementById('pedidos-list');
+      
+      document.getElementById('count-amigos').innerText = meusAmigosIds.length;
+
+      const meusAmigos = MOCK_PESSOAS.filter(p => meusAmigosIds.includes(p.id));
+      amigosList.innerHTML = meusAmigos.map(p => `
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <img src="${p.foto}" class="w-10 h-10 rounded-full object-cover border border-slate-300" />
+            <div>
+              <p class="text-xs font-bold text-slate-800">${p.nome}</p>
+              <p class="text-[10px] text-slate-500">${p.turma}</p>
+            </div>
+          </div>
+          <button onclick="abrirChat('${p.id}')" class="bg-senai-blue text-white p-2 rounded-lg hover:bg-senai-darkBlue transition" title="Abrir Mensagens">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+          </button>
+        </div>
+      `).join('') || `<p class="text-xs text-slate-400 col-span-2">Você ainda não possui amigos adicionados.</p>`;
+
+      const pedidos = MOCK_PESSOAS.filter(p => pedidosRecebidosIds.includes(p.id));
+      pedidosList.innerHTML = pedidos.map(p => `
+        <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <img src="${p.foto}" class="w-8 h-8 rounded-full object-cover" />
+            <div>
+              <p class="text-xs font-bold text-slate-800">${p.nome}</p>
+              <p class="text-[10px] text-slate-500">${p.curso}</p>
+            </div>
+          </div>
+          <div class="flex gap-1">
+            <button onclick="aceitarPedido('${p.id}')" class="bg-emerald-600 text-white p-1.5 rounded hover:bg-emerald-700 transition"><i data-lucide="check" class="w-3.5 h-3.5"></i></button>
+          </div>
+        </div>
+      `).join('') || `<p class="text-xs text-slate-400 col-span-2">Nenhuma solicitação pendente.</p>`;
+
+      renderIcons();
+    }
+
+    function aceitarPedido(id) {
+      pedidosRecebidosIds = pedidosRecebidosIds.filter(pid => pid !== id);
+      if (!meusAmigosIds.includes(id)) meusAmigosIds.push(id);
+      saveData();
+      updateBadges();
+      renderAmigosTab();
+      showToast("Solicitação de amizade aceita!", "success");
+    }
+
+    function enviarSolicitacao() {
+      const val = document.getElementById('input-add-amigo').value;
+      if (!val) return;
+      showToast(`Pedido enviado para "${val}"!`, "info");
+      document.getElementById('input-add-amigo').value = '';
+    }
+
+    function updateBadges() {
+      const badge = document.getElementById('badge-pedidos');
+      if (pedidosRecebidosIds.length > 0) {
+        badge.innerText = pedidosRecebidosIds.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    // CHAT
+    function abrirChat(pId) {
+      activeChatUser = MOCK_PESSOAS.find(p => p.id === pId);
+      if (!activeChatUser) return;
+
+      document.getElementById('chat-name').innerText = activeChatUser.nome;
+      document.getElementById('chat-avatar').src = activeChatUser.foto;
+      renderChatMessages();
+      document.getElementById('modal-chat').classList.remove('hidden');
+    }
+
+    function closeChatModal() { document.getElementById('modal-chat').classList.add('hidden'); }
+
+    function renderChatMessages() {
+      const box = document.getElementById('chat-messages');
+      const msgs = dbMensagens[activeChatUser.id] || [
+        { sender: 'them', text: `Olá ${currentUser.nome}! Vi seu projeto no Senai+, ficou sensacional!` }
+      ];
+
+      box.innerHTML = msgs.map(m => `
+        <div class="flex ${m.sender === 'me' ? 'justify-end' : 'justify-start'}">
+          <div class="max-w-[80%] px-3 py-1.5 rounded-xl text-xs ${m.sender === 'me' ? 'bg-senai-blue text-white rounded-br-none' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none'} shadow-sm">
+            ${m.text}
+          </div>
+        </div>
+      `).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function enviarMensagemChat(e) {
+      e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const txt = input.value;
+      if (!txt) return;
+
+      if (!dbMensagens[activeChatUser.id]) dbMensagens[activeChatUser.id] = [
+        { sender: 'them', text: `Olá ${currentUser.nome}! Vi seu projeto no Senai+, ficou sensacional!` }
+      ];
+
+      dbMensagens[activeChatUser.id].push({ sender: 'me', text: txt });
+      saveData();
+      renderChatMessages();
+      input.value = '';
+    }
+
+    // CÓDIGOS TAB
+    function renderCodigosTab() {
+      const list = document.getElementById('codigos-list');
+      const comCodigos = dbProjects.filter(p => p.codigos && Object.keys(p.codigos).length > 0);
+
+      list.innerHTML = comCodigos.map(p => `
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-xs text-slate-800">${p.titulo}</h3>
+            <span class="text-[10px] text-slate-500">Por ${p.autor}</span>
+          </div>
+          <pre class="bg-slate-900 text-emerald-400 p-3 rounded-lg font-mono text-[11px] overflow-x-auto"><code>${Object.values(p.codigos)[0]}</code></pre>
+        </div>
+      `).join('') || `<p class="text-xs text-slate-400">Nenhum repositório de código livre cadastrado.</p>`;
+    }
+
+    // VAGAS TAB
+    function renderVagasTab() {
+      const list = document.getElementById('vagas-list');
+      list.innerHTML = dbVagas.map(v => `
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-bold text-slate-800 text-base">${v.titulo}</h3>
+              <p class="text-xs text-emerald-600 font-semibold">${v.empresa} • <span class="text-slate-500">${v.local}</span></p>
+            </div>
+            <span class="bg-emerald-50 text-emerald-700 font-bold text-xs px-2.5 py-1 rounded-md">${v.bolsa}</span>
+          </div>
+          <p class="text-xs text-slate-600"><strong class="text-slate-700">Requisitos:</strong> ${v.requisitos}</p>
+          <div class="pt-2 flex justify-end">
+            <button onclick="openVagaModal(${v.id})" class="bg-senai-blue hover:bg-senai-darkBlue text-white text-xs font-semibold px-4 py-2 rounded-lg transition">Candidatar-se</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openVagaModal(id) {
+      selectedVagaId = id;
+      const vaga = dbVagas.find(v => v.id === id);
+      if (!vaga) return;
+
+      document.getElementById('vaga-modal-titulo').innerText = vaga.titulo;
+      document.getElementById('vaga-modal-empresa').innerText = `${vaga.empresa} — ${vaga.local}`;
+      document.getElementById('cand-nome').value = currentUser.nome;
+      document.getElementById('modal-vaga').classList.remove('hidden');
+    }
+
+    function closeVagaModal() { document.getElementById('modal-vaga').classList.add('hidden'); }
+
+    function enviarCandidatura(e) {
+      e.preventDefault();
+      dbCandidaturas.push({
+        id: Date.now(),
+        vagaId: selectedVagaId,
+        nome: document.getElementById('cand-nome').value,
+        email: document.getElementById('cand-email').value,
+        fone: document.getElementById('cand-fone').value,
+        msg: document.getElementById('cand-msg').value
+      });
+      saveData();
+      closeVagaModal();
+      showToast("Candidatura enviada com sucesso!", "success");
+    }
+
+    // GESTÃO PAINEL
+    function renderGestaoTab() {
+      const gProf = document.getElementById('gestao-professor');
+      const gEmp = document.getElementById('gestao-empresa');
+
+      if (currentUser.role === 'professor') {
+        gProf.classList.remove('hidden');
+        gEmp.classList.add('hidden');
+
+        const list = document.getElementById('professor-projects-list');
+        list.innerHTML = dbProjects.map(p => `
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-800">${p.titulo}</p>
+              <p class="text-[10px] text-slate-500">Autor: ${p.autor} (${p.turma})</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="toggleAprovacaoProf(${p.id})" class="text-xs px-2.5 py-1 rounded font-semibold transition ${p.aprovadoProfessor ? 'bg-amber-100 text-amber-700' : 'bg-slate-200 text-slate-600'}">
+                ${p.aprovadoProfessor ? 'Selo Aprovado' : 'Aprovar Projeto'}
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } else if (currentUser.role === 'empresa') {
+        gEmp.classList.remove('hidden');
+        gProf.classList.add('hidden');
+
+        const list = document.getElementById('candidaturas-list');
+        list.innerHTML = dbCandidaturas.map(c => `
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1">
+            <div class="flex justify-between font-bold">
+              <span>${c.nome}</span>
+              <span class="text-slate-500">${c.fone}</span>
+            </div>
+            <p class="text-slate-600">${c.msg}</p>
+          </div>
+        `).join('') || `<p class="text-xs text-slate-400">Nenhuma candidatura recebida até o momento.</p>`;
+      }
+    }
+
+    function toggleAprovacaoProf(id) {
+      const p = dbProjects.find(item => item.id === id);
+      if (p) {
+        p.aprovadoProfessor = !p.aprovadoProfessor;
+        saveData();
+        renderGestaoTab();
+        showToast("Status de aprovação atualizado!", "success");
+      }
+    }
+
+    function openNovaVagaModal() { document.getElementById('modal-nova-vaga').classList.remove('hidden'); }
+    function closeNovaVagaModal() { document.getElementById('modal-nova-vaga').classList.add('hidden'); }
+
+    function salvarNovaVaga(e) {
+      e.preventDefault();
+      dbVagas.unshift({
+        id: Date.now(),
+        titulo: document.getElementById('vaga-titulo').value,
+        empresa: currentUser.nome,
+        local: document.getElementById('vaga-local').value,
+        area: document.getElementById('vaga-area').value,
+        requisitos: document.getElementById('vaga-req').value,
+        bolsa: document.getElementById('vaga-bolsa').value
+      });
+      saveData();
+      closeNovaVagaModal();
+      showToast("Vaga publicada com sucesso!", "success");
+    }
+  </script>
+</body>
+</html>

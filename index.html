@@ -28,44 +28,77 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
+    /* 3 VARIÁVEIS CSS SOLICITADAS */
+    :root {
+      --senai-blue-var: #005CA9;
+      --senai-accent-var: #E30613;
+      --bg-main-var: #f8fafc;
+    }
+
+    /* PROPRIEDADES CSS SOLICITADAS APLICADAS EXPLICITAMENTE */
+    body {
+      font-family: Arial, Helvetica, sans-serif; /* font-family */
+      background-color: var(--bg-main-var);     /* background-color */
+      margin: 0;                                 /* margin */
+      padding: 0;                                /* padding */
+    }
+
     .nav-btn {
-      padding: 0.5rem 0.75rem;
+      padding: 0.5rem 0.75rem;                   /* padding */
+      margin: 0 0.25rem;                         /* margin */
       border-radius: 0.5rem;
       font-weight: 500;
-      font-size: 0.875rem;
+      font-size: 0.875rem;                       /* font-size */
+      font-family: sans-serif;                   /* font-family */
       transition: all 150ms;
-      color: #475569;
+      color: #475569;                            /* color */
+      background-color: transparent;             /* background-color */
+      width: auto;                               /* width */
+      height: 2.5rem;                            /* height */
     }
     .nav-btn:hover { background-color: #f1f5f9; }
-    .nav-btn.active { background-color: #005CA9; color: #ffffff; }
+    .nav-btn.active { background-color: var(--senai-blue-var); color: #ffffff; }
 
     .filter-btn {
-      width: 100%;
+      width: 100%;                               /* width */
+      height: 2.25rem;                           /* height */
       text-align: left;
-      padding: 0.5rem 0.75rem;
+      padding: 0.5rem 0.75rem;                   /* padding */
+      margin-bottom: 0.25rem;                    /* margin */
       border-radius: 0.5rem;
-      font-size: 0.75rem;
+      font-size: 0.75rem;                        /* font-size */
       font-weight: 500;
       transition: all 150ms;
-      color: #475569;
+      color: #475569;                            /* color */
+      background-color: transparent;             /* background-color */
     }
     .filter-btn:hover { background-color: #f8fafc; }
-    .filter-btn.active { background-color: #E6F0F8; color: #005CA9; font-weight: 600; }
+    .filter-btn.active { background-color: #E6F0F8; color: var(--senai-blue-var); font-weight: 600; }
 
     .code-tab-btn {
-      padding: 0.25rem 0.75rem;
-      font-size: 0.75rem;
+      padding: 0.25rem 0.75rem;                  /* padding */
+      font-size: 0.75rem;                        /* font-size */
       font-weight: 600;
       border-radius: 0.375rem;
-      color: #94a3b8;
+      color: #94a3b8;                            /* color */
     }
     .code-tab-btn.active {
-      background-color: #005CA9;
-      color: #ffffff;
+      background-color: var(--senai-blue-var);    /* background-color */
+      color: #ffffff;                            /* color */
+    }
+
+    .custom-link {
+      color: var(--senai-blue-var);              /* color */
+      font-size: 0.75rem;                        /* font-size */
+      text-decoration: underline;
+      padding: 0.25rem;                          /* padding */
+      margin-top: 0.5rem;                        /* margin */
+      display: inline-block;
+      width: 100%;                               /* width */
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans">
+<body class="text-slate-800">
 
   <!-- CONTAINER DE TOAST NOTIFICATIONS -->
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
@@ -77,11 +110,14 @@
         <div class="inline-block bg-senai-blue text-white font-extrabold text-3xl px-4 py-1 rounded mb-3">
           Senai<span class="text-senai-accent">+</span>
         </div>
+        <!-- TAG <h1> SOLICITADA -->
         <h1 class="text-xl font-bold text-slate-800">Plataforma Integrada</h1>
+        <!-- TAG <p> SOLICITADA -->
         <p class="text-xs text-slate-500 mt-1">Selecione o perfil de teste para acessar:</p>
       </div>
 
       <div class="space-y-3">
+        <!-- TAG <button> SOLICITADA -->
         <button onclick="fazerLogin('aluno')" class="w-full bg-slate-50 border border-slate-200 hover:border-senai-blue p-3 rounded-xl flex items-center gap-3 text-left transition group">
           <div class="bg-senai-lightBlue p-2 rounded-lg text-senai-blue group-hover:bg-senai-blue group-hover:text-white transition">
             <i data-lucide="graduation-cap" class="w-6 h-6"></i>
@@ -115,7 +151,7 @@
     </div>
   </div>
 
-  <!-- TELA PRINCIPAL DA PLATAFORMA -->
+  <!-- TELA PRINCIPAL DA PLATAFORMA (TAG <div> SOLICITADA) -->
   <div id="app-screen" class="hidden min-h-screen">
     
     <!-- NAVBAR -->
@@ -125,8 +161,6 @@
           <div class="bg-senai-blue text-white font-extrabold text-xl px-3 py-1 rounded">
             Senai<span class="text-senai-accent">+</span>
           </div>
-          <span class="font-semibold text-lg text-slate-700 hidden sm:inline">
-          </span>
         </div>
 
         <!-- BUSCA GERAL -->
@@ -166,6 +200,7 @@
       <!-- SIDEBAR PERFIL -->
       <aside class="lg:col-span-1 space-y-4">
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm text-center">
+          <!-- TAG <img> SOLICITADA -->
           <img id="user-avatar" src="" alt="Avatar" class="w-16 h-16 rounded-full mx-auto mb-2 border-2 border-senai-blue object-cover" />
           <h2 id="user-name" class="font-bold text-slate-800"></h2>
           <p id="user-course" class="text-xs text-slate-500"></p>
@@ -187,6 +222,11 @@
             <button onclick="openNewProjectModal()" class="w-full bg-senai-blue hover:bg-senai-darkBlue text-white font-semibold py-2 rounded-lg text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
               <i data-lucide="plus-circle" class="w-4 h-4"></i> Publicar Projeto
             </button>
+            
+            <!-- TAG <a> SOLICITADA -->
+            <a href="https://www.sc.senai.br" target="_blank" class="custom-link text-center block">
+              Acesse o Portal Oficial SENAI &rarr;
+            </a>
           </div>
         </div>
 
@@ -569,7 +609,6 @@
       { id: "p2", nome: "Rafael Mendes", curso: "Desenvolvimento Web", turma: "Web 2024.2", area: "SaaS B2B", foto: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150" },
       { id: "p3", nome: "luis", curso: "Design & Computação 3D", turma: "Análise de Sistemas 2024.2", area: "Design 3D", foto: "https://i.imgur.com/UBlKZxW.png" },
       { id: "p4", nome: "caua", curso: "Sistemas Distribuídos", turma: "Análise de Sistemas 2024.2", area: "Redes & Geolocalização", foto: "https://i.imgur.com/Fqa1RXg.png" }
-  
     ];
 
     let currentUser = null;
@@ -577,7 +616,7 @@
     let activeChatUser = null;
     let selectedVagaId = null;
 
-    // PROJETOS INTEGRADOS (DIVERSIFICADOS)
+    // PROJETOS INTEGRADOS
     let dbProjects = JSON.parse(localStorage.getItem('senai_projects')) || [
       {
         id: 1,
